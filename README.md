@@ -53,6 +53,35 @@ Django tutorial covering core backend concepts, Models, Views, Templates, and da
 ### Q1: Why are Virtual Environments necessary in Python development?
 > **Answer:** They ensure dependency isolation. Different projects can use different package versions on the same machine without system-level conflicts, guaranteeing reproducible production environments.
 
+
+
+---
+
+## 4. Hands-on Implementation & Workflow Log
+
+### View Implementation (`views.py`)
+Views contain the core business logic. They accept HTTP requests and return HTTP responses.
+
+* **Creating a Basic HTTP View:**
+  ```python
+  from django.shortcuts import render
+  from django.http import HttpResponse
+
+  def members(request):
+      return HttpResponse("Hello world!")
+
+## 5. Development CLI Quick Reference
+# Activate Virtual Environment
+venv\Scripts\activate
+
+# Run Local Development Server
+python manage.py runserver
+
+# Create a New Sub-App
+python manage.py startapp <app_name>
+
+
+
 ### Q2: What is the difference between `makemigrations` and `migrate`?
 > **Answer:** `makemigrations` reads `models.py` and generates Python migration scripts describing schema changes. `migrate` executes those scripts against the database to update actual tables.
 
