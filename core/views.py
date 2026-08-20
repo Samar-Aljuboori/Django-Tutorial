@@ -1,10 +1,14 @@
-
 from django.shortcuts import render
+from .models import Task
 
 def core(request):
-    #   Data list
+    # Retrieve all task objects from the SQLite database
+    tasks = Task.objects.all()
+    
+    # Prepare data dictionary to pass to the HTML template
     context = {
-        'user_name': 'Samar',
-        'tasks': ['Setup Django', 'Understand URLs', 'Master Templates']
+        'tasks': tasks
     }
+    
+    # Render and return the HTML response with database content
     return render(request, 'index.html', context)
