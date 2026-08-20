@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Task Tracker</title>
+    <style>
+        .completed {
+            text-decoration: line-through;
+            color: gray;
+        }
+    </style>
 </head>
 <body>
     <h1>Task Tracker App</h1>
@@ -17,7 +23,15 @@
     <h3>My Tasks:</h3>
     <ul>
         {% for task in tasks %}
-            <li>{{ task.title }}</li>
+            <li>
+                <span class="{% if task.completed %}completed{% endif %}">
+                    {{ task.title }}
+                </span>
+                <a href="{% url 'toggle_task' task.id %}">
+                    {% if task.completed %}[Undo]{% else %}[Done]{% endif %}
+                </a>
+                <a href="{% url 'delete_task' task.id %}">[Delete]</a>
+            </li>
         {% empty %}
             <li>No tasks added yet.</li>
         {% endfor %}
