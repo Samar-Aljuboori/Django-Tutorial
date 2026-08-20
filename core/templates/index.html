@@ -21,9 +21,11 @@
     <ul class="task-list">
         {% for task in tasks %}
             <li class="task-item">
-                <span class="task-title {% if task.completed %}completed{% endif %}">
+                <a href="{% url 'task_detail' task.id %}" style="text-decoration: none;">
+                 <span class="task-title {% if task.completed %}completed{% endif %}">
                     {{ task.title }}
-                </span>
+                 </span>
+               </a>
                 <div class="actions">
                     <a href="{% url 'toggle_task' task.id %}" class="btn-action {% if task.completed %}btn-undo{% else %}btn-done{% endif %}">
                         {% if task.completed %}Undo{% else %}Done{% endif %}

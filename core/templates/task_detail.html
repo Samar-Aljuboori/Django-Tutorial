@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Task Details{% endblock %}
+
+{% block content %}
+    <div style="border-bottom: 2px solid #f3f4f6; padding-bottom: 15px; margin-bottom: 20px;">
+        <h1 style="font-size: 22px; color: #111827; margin: 0;">Task Overview</h1>
+    </div>
+
+    <!-- Detail Card -->
+    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+        <div style="margin-bottom: 15px;">
+            <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #6b7280; letter-spacing: 0.5px;">Task Name</span>
+            <h2 style="font-size: 18px; color: #1f2937; margin-top: 4px; font-weight: 600;">{{ task.title }}</h2>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px dashed #e5e7eb;">
+            <div>
+                <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #6b7280; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Status</span>
+                {% if task.completed %}
+                    <span style="background-color: #d1fae5; color: #065f46; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 12px;">Completed</span>
+                {% else %}
+                    <span style="background-color: #fef3c7; color: #92400e; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 12px;">Pending</span>
+                {% endif %}
+            </div>
+
+            <div style="text-align: right;">
+                <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: #6b7280; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">Created At</span>
+                <!-- German Date Format: DD.MM.YYYY - HH:MM -->
+                <span style="font-size: 14px; color: #374151; font-weight: 500;">{{ task.created_at|date:"d.m.Y - H:i" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <a href="{% url 'core' %}" class="btn-action btn-undo" style="display: inline-flex; align-items: center; justify-content: center; width: 100%; text-align: center; padding: 10px 0; font-size: 14px;">
+        ← Back to Task List
+    </a>
+{% endblock %}
