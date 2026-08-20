@@ -5,12 +5,21 @@
     <title>Task Tracker</title>
 </head>
 <body>
-    <h1>Welcome {{ user_name }}!</h1>
+    <h1>Task Tracker App</h1>
+
+    <!-- Form to submit a new task -->
+    <form method="POST">
+        {% csrf_token %}
+        <input type="text" name="title" placeholder="Enter a new task..." required>
+        <button type="submit">Add Task</button>
+    </form>
+
     <h3>My Tasks:</h3>
-    
     <ul>
         {% for task in tasks %}
-            <li>{{ task }}</li>
+            <li>{{ task.title }}</li>
+        {% empty %}
+            <li>No tasks added yet.</li>
         {% endfor %}
     </ul>
 </body>
