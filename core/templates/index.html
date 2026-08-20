@@ -5,7 +5,13 @@
     <title>Task Tracker</title>
 </head>
 <body>
-    <h1>Welcome to My Task Tracker App</h1>
-    <p>This is my first Django template!</p>
+    <h1>Welcome {{ user_name }}!</h1>
+    <h3>My Tasks:</h3>
+    
+    <ul>
+        {% for task in tasks %}
+            <li>{{ task }}</li>
+        {% endfor %}
+    </ul>
 </body>
 </html>
