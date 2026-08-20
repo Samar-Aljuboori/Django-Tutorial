@@ -2,26 +2,32 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import Task
 
 def core(request):
+    # Handle new task creation via POST
     if request.method == 'POST':
         task_title = request.POST.get('title')
         if task_title:
             Task.objects.create(title=task_title)
             return redirect('core')
 
-    tasks = Task.objects.all()
+    # Handle search functionality via GET query parameter
+    search_query = request.GET.get('search', '')
+    if search_query:
+        tasks = Task.objects.filter(title__icontains=search_query)
+    else:
+        tasks = Task.objects.all()
+
     context = {
-        'tasks': tasks
+        'tasks': tasks,
+        'search_query': search_query,
     }
     return render(request, 'index.html', context)
 
-# Toggle task completion status
 def toggle_task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
     task.completed = not task.completed
     task.save()
     return redirect('core')
 
-# Delete a specific task from the database
 def delete_task(request, task_id):
     task = get_object_or_404(Task, id=task_id)
     task.delete()
