@@ -3,12 +3,12 @@
 {% block title %}Task Tracker{% endblock %}
 
 {% block content %}
-    <h1>Task Tracker</h1>
+    <h1>My Task List ({{ tasks.count }}) </h1>
 
     <!-- Form to Add a New Task -->
     <form method="POST" class="form-group">
         {% csrf_token %}
-        <input type="text" name="title" placeholder="Enter a new task..." required>
+        <input type="text" name="title" placeholder="add a new task..." required>
         <button type="submit" class="btn-add">Add Task</button>
     </form>
 
