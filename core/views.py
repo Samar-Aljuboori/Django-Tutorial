@@ -38,3 +38,8 @@ def delete_task(request, task_id):
 def task_detail(request, task_id):
     task = get_object_or_404(Task, id=task_id)
     return render(request, 'task_detail.html', {'task': task})
+
+ # Delete all tasks marked as completed
+def clear_completed(request):
+    Task.objects.filter(completed=True).delete()
+    return redirect('core')

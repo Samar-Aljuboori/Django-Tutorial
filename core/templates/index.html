@@ -24,6 +24,12 @@
         <input type="text" name="search" placeholder="Search tasks..." value="{{ search_query }}">
     </form>
 
+
+<!-- Button to clear completed tasks -->
+<div style="margin-bottom: 16px; text-align: right;">
+    <a href="{% url 'clear_completed' %}" class="btn-action btn-delete">Clear Completed Tasks</a>
+</div>    
+
 <!-- Task List -->
 <ul class="task-list">
     {% for task in tasks %}
