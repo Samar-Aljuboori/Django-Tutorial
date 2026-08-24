@@ -5,9 +5,11 @@ def core(request):
     # Handle new task creation via POST
     if request.method == 'POST':
         task_title = request.POST.get('title')
-        task_priority = request.POST.get('priority', 'low')   
+        task_priority = request.POST.get('priority', 'low') 
+        task_due_date = request.POST.get('due_date') or None # Set None if no date is picked  
         if task_title:
             Task.objects.create(title=task_title, priority=task_priority)
+            due_date=task_due_date
             return redirect('core')
 
     # Handle search functionality via GET query parameter

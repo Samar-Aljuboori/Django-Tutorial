@@ -4,19 +4,27 @@
 {% block title %}Task Tracker{% endblock %}
 
 {% block content %}
-    <h1>My Task List ({{ tasks.count }}) </h1>
+    <h1>My Task List ({{ tasks.count }})</h1>
 
     <!-- Form to Add a New Task -->
-    <form method="POST" class="form-group">
+    <form method="POST" class="add-task-form">
         {% csrf_token %}
-        <input type="text" name="title" placeholder="add a new task..." required>
+        
+        <!-- Main row for task title input and submit button -->
+        <div class="form-row">
+            <input type="text" name="title" placeholder="add a new task..." required class="task-input">
+            <button type="submit" class="btn-add">Add Task</button>
+        </div>
 
-        <select name="priority">
-          <option value="low">Low</option>
-          <option value="high">High</option>
-       </select>
+        <!-- Options row for priority dropdown and due date picker -->
+        <div class="form-row">
+            <select name="priority" class="priority-select">
+                <option value="low">Low Priority</option>
+                <option value="high">High Priority</option>
+            </select>
 
-        <button type="submit" class="btn-add">Add Task</button>
+            <input type="date" name="due_date" class="date-input">
+        </div>
     </form>
 
     <!-- Form to Search Tasks -->
@@ -24,44 +32,52 @@
         <input type="text" name="search" placeholder="Search tasks..." value="{{ search_query }}">
     </form>
 
+    <!-- Button container to clear completed tasks -->
+    <div class="clear-container">
+        <a href="{% url 'clear_completed' %}" class="btn-action btn-delete">Clear Completed Tasks</a>
+    </div>
 
-<!-- Button to clear completed tasks -->
-<div style="margin-bottom: 16px; text-align: right;">
-    <a href="{% url 'clear_completed' %}" class="btn-action btn-delete">Clear Completed Tasks</a>
-</div>    
+    <!-- Task List -->
+    <ul class="task-list">
+        {% for task in tasks %}
+            <li class="task-item">
+                <div class="task-main">
+                    <!-- Task Title -->
+                    <a href="{% url 'task_detail' task.id %}" class="task-link">
+                        <span class="task-title {% if task.completed %}completed{% endif %}">
+                            {{ task.title }}
+                        </span>
+                    </a>
 
-<!-- Task List -->
-<ul class="task-list">
-    {% for task in tasks %}
-        <li class="task-item">
-            <!-- Left container for task title and priority badge alignment -->
-            <div class="task-main">
-                <a href="{% url 'task_detail' task.id %}" class="task-link">
-                    <span class="task-title {% if task.completed %}completed{% endif %}">
-                        {{ task.title }}
+                    <!-- Priority Badge -->
+                    <span class="priority-badge priority-{{ task.priority|lower }}">
+                        {{ task.get_priority_display }}
                     </span>
-                </a>
-                <span class="priority-badge priority-{{ task.priority|lower }}">
-                    {{ task.get_priority_display }}
-                </span>
-            </div>
 
-            <!-- Action buttons -->
-            <div class="actions">
-                <a href="{% url 'toggle_task' task.id %}" class="btn-action {% if task.completed %}btn-undo{% else %}btn-done{% endif %}">
-                    {% if task.completed %}Undo{% else %}Done{% endif %}
-                </a>
-                <a href="{% url 'delete_task' task.id %}" class="btn-action btn-delete">Delete</a>
+                    <!-- Due Date Badge -->
+                    {% if task.due_date %}
+                        <span class="due-date-badge {% if task.is_overdue %}overdue{% endif %}">
+                            📅 {{ task.due_date|date:"Y-m-d" }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="actions">
+                    <a href="{% url 'toggle_task' task.id %}" class="btn-action {% if task.completed %}btn-undo{% else %}btn-done{% endif %}">
+                        {% if task.completed %}Undo{% else %}Done{% endif %}
+                    </a>
+                    <a href="{% url 'delete_task' task.id %}" class="btn-action btn-delete">Delete</a>
+                </div>
+            </li>
+        {% empty %}
+            <div class="empty-state">
+                {% if search_query %}
+                    No tasks found matching "{{ search_query }}".
+                {% else %}
+                    No tasks added yet. Add one above!
+                {% endif %}
             </div>
-        </li>
-    {% empty %}
-        <div class="empty-state">
-            {% if search_query %}
-                No tasks found matching "{{ search_query }}".
-            {% else %}
-                No tasks added yet. Add one above!
-            {% endif %}
-        </div>
-    {% endfor %}
-</ul>
+        {% endfor %}
+    </ul>
 {% endblock %}
