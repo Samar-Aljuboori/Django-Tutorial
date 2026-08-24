@@ -63,12 +63,15 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="actions">
-                    <a href="{% url 'toggle_task' task.id %}" class="btn-action {% if task.completed %}btn-undo{% else %}btn-done{% endif %}">
-                        {% if task.completed %}Undo{% else %}Done{% endif %}
-                    </a>
-                    <a href="{% url 'delete_task' task.id %}" class="btn-action btn-delete">Delete</a>
-                </div>
+                 
+               <!-- Action Buttons -->
+<div class="actions">
+    <a href="{% url 'toggle_task' task.id %}" class="btn-action {% if task.completed %}btn-undo{% else %}btn-done{% endif %}">
+        {% if task.completed %}Undo{% else %}Done{% endif %}
+    </a>
+    <a href="{% url 'edit_task' task.id %}" class="btn-action btn-undo">Edit</a>
+    <a href="{% url 'delete_task' task.id %}" class="btn-action btn-delete">Delete</a>
+</div>
             </li>
         {% empty %}
             <div class="empty-state">

@@ -45,3 +45,16 @@ def task_detail(request, task_id):
 def clear_completed(request):
     Task.objects.filter(completed=True).delete()
     return redirect('core')
+
+# View to edit an existing task
+def edit_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+
+    if request.method == 'POST':
+        task.title = request.POST.get('title')
+        task.priority = request.POST.get('priority', 'low')
+        task.due_date = request.POST.get('due_date') or None
+        task.save()
+        return redirect('core')
+
+    return render(request, 'edit_task.html', {'task': task})
