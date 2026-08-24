@@ -141,3 +141,69 @@ input[type="text"]:focus {
   font-size: 14px;
   padding: 24px 0;
 }
+/* Select dropdown styling to match input fields */
+select[name="priority"] {
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #ffffff;
+  color: #374151;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+select[name="priority"]:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Flex layout for task list item alignment */
+.task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  padding: 14px 16px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+/* Left container aligning title and badge */
+.task-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.task-link {
+  text-decoration: none;
+}
+
+/* Priority badges unified typography and colors */
+.priority-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.priority-high {
+  background-color: #ffe6e6 !important;
+  color: #d9534f !important;
+  border: 1px solid #f5c6cb !important;
+}
+
+.priority-low {
+  background-color: #e6f0ff !important;
+  color: #0275d8 !important;
+  border: 1px solid #b8daff !important;
+}
