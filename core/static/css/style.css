@@ -236,3 +236,44 @@ h1 {
   font-size: 14px;
   padding: 24px 0;
 }
+
+/* Filter and Sort Form Styling */
+.filter-sort-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.filter-group {
+    display: flex;
+    gap: 8px;
+}
+
+.filter-select {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 13px;
+    background-color: #ffffff;
+    color: #374151;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-select:focus, .search-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}

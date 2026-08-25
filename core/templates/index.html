@@ -8,7 +8,7 @@
 
     <!-- Form to Add a New Task -->
     <form method="POST" class="add-task-form">
-        {% csrf_token %}
+        {% csrf_token %}   <!--(Cross-Site Request Forgery Token)-->
         
         <!-- Main row for task title input and submit button -->
         <div class="form-row">
@@ -27,12 +27,35 @@
         </div>
     </form>
 
-    <!-- Form to Search Tasks -->
-    <form method="GET" class="search-box">
-        <input type="text" name="search" placeholder="Search tasks..." value="{{ search_query }}">
+    <!-- Combined Search, Filter, and Sort Controls -->
+    <form method="GET" class="filter-sort-form">
+        <input type="text" name="search" placeholder="Search tasks..." value="{{ search_query }}" class="search-input">
+
+        <div class="filter-group">
+            <!-- Status Filter -->
+            <select name="status" onchange="this.form.submit()" class="filter-select">
+                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+                <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+            </select>
+
+            <!-- Priority Filter -->
+            <select name="priority_filter" onchange="this.form.submit()" class="filter-select">
+                <option value="all" {% if priority_filter == 'all' %}selected{% endif %}>All Priorities</option>
+                <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low Priority</option>
+                <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High Priority</option>
+            </select>
+
+            <!-- Sorting Dropdown -->
+            <select name="sort" onchange="this.form.submit()" class="filter-select">
+                <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+                <option value="oldest" {% if sort_by == 'oldest' %}selected{% endif %}>Oldest First</option>
+                <option value="due_date" {% if sort_by == 'due_date' %}selected{% endif %}>Due Date</option>
+            </select>
+        </div>
     </form>
 
-    <!-- Button container to clear completed tasks -->
+    <!-- Clear Completed Button Container -->
     <div class="clear-container">
         <a href="{% url 'clear_completed' %}" class="btn-action btn-delete">Clear Completed Tasks</a>
     </div>
@@ -42,7 +65,7 @@
         {% for task in tasks %}
             <li class="task-item">
                 <div class="task-main">
-                    <!-- Task Title -->
+                    <!-- Task Title Link -->
                     <a href="{% url 'task_detail' task.id %}" class="task-link">
                         <span class="task-title {% if task.completed %}completed{% endif %}">
                             {{ task.title }}
@@ -63,22 +86,20 @@
                 </div>
 
                 <!-- Action Buttons -->
-                 
-               <!-- Action Buttons -->
-<div class="actions">
-    <a href="{% url 'toggle_task' task.id %}" class="btn-action {% if task.completed %}btn-undo{% else %}btn-done{% endif %}">
-        {% if task.completed %}Undo{% else %}Done{% endif %}
-    </a>
-    <a href="{% url 'edit_task' task.id %}" class="btn-action btn-undo">Edit</a>
-    <a href="{% url 'delete_task' task.id %}" class="btn-action btn-delete">Delete</a>
-</div>
+                <div class="actions">
+                    <a href="{% url 'toggle_task' task.id %}" class="btn-action {% if task.completed %}btn-undo{% else %}btn-done{% endif %}">
+                        {% if task.completed %}Undo{% else %}Done{% endif %}
+                    </a>
+                    <a href="{% url 'edit_task' task.id %}" class="btn-action btn-undo">Edit</a>
+                    <a href="{% url 'delete_task' task.id %}" class="btn-action btn-delete">Delete</a>
+                </div>
             </li>
         {% empty %}
             <div class="empty-state">
                 {% if search_query %}
                     No tasks found matching "{{ search_query }}".
                 {% else %}
-                    No tasks added yet. Add one above!
+                    No tasks found.
                 {% endif %}
             </div>
         {% endfor %}

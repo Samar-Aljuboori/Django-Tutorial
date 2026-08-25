@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Task
 from django.contrib.auth.decorators import login_required
-
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.forms import AuthenticationForm
 @login_required
 def core(request):
     # 1. Handle new task creation via POST
@@ -92,3 +93,17 @@ def edit_task(request, task_id):
         return redirect('core')
 
     return render(request, 'edit_task.html', {'task': task})
+
+
+  # User Login Page
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('core')
+    else:
+        form = AuthenticationForm()
+    
+    return render(request, 'login.html', {'form': form})
