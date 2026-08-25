@@ -10,6 +10,10 @@ urlpatterns = [
     path('clear-completed/', views.clear_completed, name='clear_completed'),
     # URL route for editing a task
     path('edit/<int:task_id>/', views.edit_task, name='edit_task'),
-     # URL route for user login
+     # URL route for user login 
     path('login/', views.login_view, name='login'),
+     # URL route for register new user  
+    path('register/', views.register_view, name='register'),
+     # URL route for user logout  
+    path('logout/', views.logout_view, name='logout'),
 ]
