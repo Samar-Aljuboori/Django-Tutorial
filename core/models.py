@@ -1,66 +1,53 @@
 from django.db import models
-from django.utils import timezone  # Utility for handling timezone-aware dates and times
-from django.contrib.auth.models import User  # Built-in User model for authentication
-
+from django.contrib.auth.models import User
 
 # ==========================================
-# Category Model: Stores custom user categories (e.g., Work, Study)
+# Category Model: Handles task categories (e.g., Work, Study)
 # ==========================================
 class Category(models.Model):
-    # Links the category to a specific user; deletes categories if the user is deleted
+    # Foreign key linking the category to a specific user; deletes categories if the user is deleted
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     
-    # Category name field (e.g., Work, Study, Shopping)
+    # Stores the name of the category (e.g., Work, Study, Shopping)
     name = models.CharField(max_length=50)
 
-    # Meta options to fix the plural spelling in Django Admin ("Categories" instead of "Categorys")
+    # Meta class to fix the plural spelling in Django Admin panel ("Categories" instead of "Categorys")
     class Meta:
         verbose_name_plural = "Categories"
 
-    # String representation showing the category name in admin and queries
+    # Returns the category name as a string representation in the admin panel
     def __str__(self):
         return self.name
 
 
 # ==========================================
-# Task Model: Stores individual user tasks
+# Task Model: Handles individual user tasks
 # ==========================================
 class Task(models.Model):
-    # 1st column: Title or main description of the task
+    # Foreign key linking the task to the user who owns it; deletes tasks if the user is deleted
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)    
+    # Stores the title or main text of the task
     title = models.CharField(max_length=200)
-
-    # 2nd column: Completion status (False = active, True = completed)
+    
+    # Stores the priority level of the task (e.g., low, medium, high) with 'low' as default
+    PRIORITY_CHOICES = [
+        ('low', 'Low'),
+        ('high', 'High'),
+    ]
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='low')    
+    # Optional due date for the task; allows null values in the database and empty forms
+    due_date = models.DateField(null=True, blank=True)
+    
+    # Boolean flag to track if the task is completed (True) or pending (False)
     completed = models.BooleanField(default=False)
-
-    # 3rd column: Creation timestamp (automatically set on creation)
+    
+    # Optional relationship linking the task to a Category
+    # SET_NULL: Keeps the task safe and sets its category to NULL if the category is deleted
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    # Automatically saves the exact date and time when the task was created
     created_at = models.DateTimeField(auto_now_add=True)
 
-    # Predefined priority choices
-    PRIORITY_CHOICES = [
-        ('high', 'High'),
-        ('low', 'Low'),
-    ]
-
-    # 4th column: Priority level with 'low' set as default
-    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='low')
-
-    # 5th column: Optional due date for the task
-    due_date = models.DateField(null=True, blank=True)
-
-    # 6th column: Links task to the logged-in user who created it
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-
-    # 7th column: Optional relationship linking the task to a Category
-    # SET_NULL: If the category is deleted, the task remains safe and category becomes NULL
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
-
-    # Dynamic property decorator converting this method into an attribute (accessible as 'task.is_overdue' in HTML templates)
-    @property
-    def is_overdue(self):
-        if self.due_date and not self.completed:
-            return self.due_date < timezone.now().date()
-        return False
-
-    # Returns the actual task title when printed in python shell or admin
+    # Returns the task title as its string representation
     def __str__(self):
         return self.title

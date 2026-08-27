@@ -1,27 +1,44 @@
 {% extends 'base.html' %}
-{% load static %}
 
 {% block title %}Task Tracker{% endblock %}
 
 {% block content %}
-    <h1>My Task List ({{ tasks.count }})</h1>
-    <header style="display: flex; justify-content: space-between; align-items: center;">
+    <h1>My Task List ({{ tasks.paginator.count|default:tasks.count }})</h1>
+    
+    <!-- Header Bar -->
+    <div class="header-bar">
         <h3>Welcome, {{ request.user.username }}!</h3>
-        <a href="{% url 'logout' %}">Logout</a>
-    </header>
+        <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+    </div>
 
-    <!-- Form to Add a New Task -->
+    <!-- Add Category Section Box -->
+    <div class="category-box">
+    <form method="POST" action="{% url 'add_category' %}" class="add-category-form">
+        {% csrf_token %}
+        <div class="form-row" style="display: flex; gap: 10px; width: 100%;">
+            <input type="text" name="name" placeholder="Category name (e.g. Work, Personal, Study)" required class="category-input">
+            <button type="submit" class="btn-add-category">+ Category</button>
+        </div>
+        </form>
+    </div>
+
+    <!-- Add Task Form -->
     <form method="POST" class="add-task-form">
-        {% csrf_token %}   <!--(Cross-Site Request Forgery Token)-->
+        {% csrf_token %}
         
-        <!-- Main row for task title input and submit button -->
         <div class="form-row">
             <input type="text" name="title" placeholder="add a new task..." required class="task-input">
             <button type="submit" class="btn-add">Add Task</button>
         </div>
 
-        <!-- Options row for priority dropdown and due date picker -->
         <div class="form-row">
+            <select name="category" class="category-select">
+                <option value="">No Category</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+
             <select name="priority" class="priority-select">
                 <option value="low">Low Priority</option>
                 <option value="high">High Priority</option>
@@ -31,26 +48,32 @@
         </div>
     </form>
 
-    <!-- Combined Search, Filter, and Sort Controls -->
+    <!-- Search, Filters and Sorting -->
     <form method="GET" class="filter-sort-form">
         <input type="text" name="search" placeholder="Search tasks..." value="{{ search_query }}" class="search-input">
 
         <div class="filter-group">
-            <!-- Status Filter -->
+            <select name="category_filter" onchange="this.form.submit()" class="filter-select">
+                <option value="all">All Categories</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.name }}" {% if category_filter == cat.name %}selected{% endif %}>
+                        {{ cat.name }}
+                    </option>
+                {% endfor %}
+            </select>
+
             <select name="status" onchange="this.form.submit()" class="filter-select">
                 <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
                 <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
                 <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
             </select>
 
-            <!-- Priority Filter -->
             <select name="priority_filter" onchange="this.form.submit()" class="filter-select">
                 <option value="all" {% if priority_filter == 'all' %}selected{% endif %}>All Priorities</option>
                 <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low Priority</option>
                 <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High Priority</option>
             </select>
 
-            <!-- Sorting Dropdown -->
             <select name="sort" onchange="this.form.submit()" class="filter-select">
                 <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
                 <option value="oldest" {% if sort_by == 'oldest' %}selected{% endif %}>Oldest First</option>
@@ -59,7 +82,6 @@
         </div>
     </form>
 
-    <!-- Clear Completed Button Container -->
     <div class="clear-container">
         <a href="{% url 'clear_completed' %}" class="btn-action btn-delete">Clear Completed Tasks</a>
     </div>
@@ -69,19 +91,22 @@
         {% for task in tasks %}
             <li class="task-item">
                 <div class="task-main">
-                    <!-- Task Title Link -->
                     <a href="{% url 'task_detail' task.id %}" class="task-link">
                         <span class="task-title {% if task.completed %}completed{% endif %}">
                             {{ task.title }}
                         </span>
                     </a>
 
-                    <!-- Priority Badge -->
+                    {% if task.category %}
+                        <span class="category-badge">
+                            {{ task.category.name }}
+                        </span>
+                    {% endif %}
+
                     <span class="priority-badge priority-{{ task.priority|lower }}">
                         {{ task.get_priority_display }}
                     </span>
 
-                    <!-- Due Date Badge -->
                     {% if task.due_date %}
                         <span class="due-date-badge {% if task.is_overdue %}overdue{% endif %}">
                             📅 {{ task.due_date|date:"Y-m-d" }}
@@ -89,7 +114,6 @@
                     {% endif %}
                 </div>
 
-                <!-- Action Buttons -->
                 <div class="actions">
                     <a href="{% url 'toggle_task' task.id %}" class="btn-action {% if task.completed %}btn-undo{% else %}btn-done{% endif %}">
                         {% if task.completed %}Undo{% else %}Done{% endif %}
@@ -108,4 +132,26 @@
             </div>
         {% endfor %}
     </ul>
+
+   <!-- Pagination Section -->
+{% if tasks.has_other_pages %}
+<div class="pagination-container">
+    {% if tasks.has_previous %}
+        <a href="?page={{ tasks.previous_page_number }}&search={{ search_query }}&category_filter={{ category_filter }}&status={{ status_filter }}&priority_filter={{ priority_filter }}&sort={{ sort_by }}" class="btn-action btn-edit">
+            &laquo; Previous
+        </a>
+    {% endif %}
+
+    <span class="page-info">
+        Page {{ tasks.number }} of {{ tasks.paginator.num_pages }}
+    </span>
+
+    {% if tasks.has_next %}
+        <a href="?page={{ tasks.next_page_number }}&search={{ search_query }}&category_filter={{ category_filter }}&status={{ status_filter }}&priority_filter={{ priority_filter }}&sort={{ sort_by }}" class="btn-action btn-edit">
+            Next &raquo;
+        </a>
+    {% endif %}
+</div>
+{% endif %}
+
 {% endblock %}

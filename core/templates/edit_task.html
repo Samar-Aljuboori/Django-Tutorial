@@ -15,8 +15,17 @@
             <input type="text" name="title" value="{{ task.title }}" required class="task-input">
         </div>
 
-        <!-- Priority dropdown and due date picker pre-filled -->
+        <!-- Category selection, priority dropdown, and due date picker -->
         <div class="form-row">
+            <select name="category" class="category-select">
+                <option value="">No Category</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if task.category and task.category.id == cat.id %}selected{% endif %}>
+                        {{ cat.name }}
+                    </option>
+                {% endfor %}
+            </select>
+
             <select name="priority" class="priority-select">
                 <option value="low" {% if task.priority == 'low' %}selected{% endif %}>Low Priority</option>
                 <option value="high" {% if task.priority == 'high' %}selected{% endif %}>High Priority</option>
@@ -28,7 +37,7 @@
         <!-- Save and Cancel action buttons -->
         <div style="display: flex; gap: 10px; margin-top: 10px;">
             <button type="submit" class="btn-add">Save Changes</button>
-            <a href="{% url 'core' %}" class="btn-action btn-undo">Cancel</a>
+            <a href="{% url 'index' %}" class="btn-action btn-undo">Cancel</a>
         </div>
     </form>
 {% endblock %}
