@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analytics - Task Tracker{% endblock %}
+
+{% block content %}
+<!-- Link separate CSS file for analytics page -->
+<link rel="stylesheet" href="{% static 'css/analytics.css' %}">
+<!-- FontAwesome CDN for clean icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="analytics-container">
+    
+    <!-- Page Header -->
+    <div class="analytics-header">
+        <h2>Task Analytics & Performance</h2>
+        <p>Monitor your productivity metrics, task completion rates, and workflow progress.</p>
+    </div>
+
+    <!-- Stats Cards Grid -->
+    <div class="analytics-grid">
+        
+        <!-- Total Tasks Card -->
+        <div class="stat-card">
+            <div class="stat-icon purple">
+                <i class="fa-solid fa-list-check"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ total_tasks }}</h3>
+                <p>Total Tasks</p>
+            </div>
+        </div>
+
+        <!-- Completed Tasks Card -->
+        <div class="stat-card">
+            <div class="stat-icon green">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ completed_tasks }}</h3>
+                <p>Completed Tasks</p>
+            </div>
+        </div>
+
+        <!-- Pending Tasks Card -->
+        <div class="stat-card">
+            <div class="stat-icon orange">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ pending_tasks }}</h3>
+                <p>Pending Tasks</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Overall Productivity Progress Section -->
+    <div class="analytics-section">
+        <h3>Overall Completion Rate</h3>
+        
+        <!-- Dynamic Progress Bar -->
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: {{ completion_rate }}%;"></div>
+        </div>
+        
+        <div class="progress-details">
+            <span>Productivity Score</span>
+            <span style="font-weight: 700; color: #7c3aed;">{{ completion_rate }}% Completed</span>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

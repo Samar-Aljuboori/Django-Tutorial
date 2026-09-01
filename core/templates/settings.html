@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Settings - Task Tracker{% endblock %}
+
+{% block content %}
+<div class="settings-page-layout">
+    
+    <!-- Sub-Sidebar Navigation -->
+    <div class="settings-sub-sidebar">
+        <div class="sub-sidebar-title">Your account</div>
+        <a href="{% url 'settings' %}" class="sub-nav-item active">Profile</a>
+        <a href="{% url 'performance' %}" class="sub-nav-item {% if request.resolver_match.url_name == 'performance' %}active{% endif %}">Performance</a> 
+        <a href="{% url 'notifications' %}" class="sub-nav-item {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">Notifications</a>        <div class="sub-sidebar-title" style="margin-top: 20px;">Security</div>
+        <a href="#" class="sub-nav-item">Password & Security</a>
+    </div>
+
+    <!-- Main Settings Content Area -->
+    <div class="settings-content-area">
+        <div class="settings-main-header">
+            <h2>Account</h2>
+        </div>
+
+        <form method="POST" class="settings-form-card" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Profile Picture Section -->
+            <div class="section-block">
+                <h3 class="section-title">Profile Picture</h3>
+                <div class="avatar-upload-row">
+                    <div class="current-avatar-preview" id="avatarPreviewContainer">
+                        {% if request.user.profile.avatar %}
+                            <img src="{{ request.user.profile.avatar.url }}" alt="Avatar" id="avatarImg">
+                        {% else %}
+                            <span id="avatarInitial">{{ request.user.username|first|upper }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="avatar-actions">
+                        <label for="profile_picture" class="btn-purple-upload">
+                            Upload Image
+                        </label>
+                        <input type="file" id="profile_picture" name="profile_picture" accept="image/*" style="display: none;" onchange="previewImage(event)">
+                        <input type="hidden" id="remove_avatar_flag" name="remove_avatar" value="false">
+                        <button type="button" class="btn-light-remove" onclick="removeAvatarImage()">Remove</button>
+                    </div>
+                </div>
+                <p class="upload-hint">We support PNGs, JPEGs and GIFs under 10MB</p>
+            </div>
+
+            <!-- First Name / Username & Email Row -->
+            <div class="form-row-grid">
+                <div class="input-group">
+                    <label>Username</label>
+                    <input type="text" name="username" value="{{ request.user.username }}" class="pro-input" required>
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <div class="email-inline-row">
+                        <input type="email" name="email" value="{{ request.user.email }}" class="pro-input" required>
+                        <button type="button" class="btn-edit-email">Edit Email</button>
+                    </div>
+                </div>
+            </div>
+            <p class="upload-hint" style="margin-top: -10px; margin-bottom: 20px;">Used to log in to your account</p>
+
+            <!-- Password Section Row -->
+            <div class="section-block password-section-box">
+                <div class="password-text-info">
+                    <h3 class="section-title" style="margin-bottom: 4px;">Password</h3>
+                    <p class="upload-hint" style="margin-bottom: 0;">Log in with your password instead of using temporary login codes</p>
+                </div>
+                <button type="button" class="btn-light-remove" onclick="togglePasswordBox()">Change Password</button>
+            </div>
+
+            <!-- Hidden Password Box with Clean SVG Eye Icon -->
+            <div id="passwordFieldsContainer" class="password-box-wrapper" style="display: none;">
+                <div class="input-group">
+                    <label>Current Password</label>
+                    <div class="password-input-wrapper">
+                        {{ password_form.old_password }}
+                        <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('id_old_password', this)" aria-label="Toggle password visibility">
+                            <!-- Eye Open Icon (Default) -->
+                            <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>New Password</label>
+                    <div class="password-input-wrapper">
+                        {{ password_form.new_password1 }}
+                        <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('id_new_password1', this)" aria-label="Toggle password visibility">
+                            <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Confirm New Password</label>
+                    <div class="password-input-wrapper">
+                        {{ password_form.new_password2 }}
+                        <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('id_new_password2', this)" aria-label="Toggle password visibility">
+                            <svg class="eye-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Actions (Cancel & Save) -->
+            <div class="form-footer-actions" style="margin-top: 30px; margin-bottom: 40px; display: flex; justify-content: flex-end; gap: 15px;">
+                <a href="{% url 'core' %}" class="btn-cancel-link" style="padding: 10px 20px; text-decoration: none; color: #4b5563; font-weight: 500;">Cancel</a>
+                <button type="submit" class="btn-save-purple" style="padding: 10px 24px; background: #7c3aed; color: #fff; border: none; border-radius: 8px; font-weight: 500; cursor: pointer;">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Toggle visibility of password change fields container
+    function togglePasswordBox() {
+        const box = document.getElementById('passwordFieldsContainer');
+        if (box) {
+            if (box.style.display === 'none' || box.style.display === '') {
+                box.style.display = 'block';
+            } else {
+                box.style.display = 'none';
+            }
+        }
+    }
+
+    // Function to toggle password visibility and swap SVG icon cleanly
+    function togglePasswordVisibility(fieldId, btn) {
+        const passwordInput = document.getElementById(fieldId);
+        const icon = btn.querySelector('.eye-icon');
+        if (passwordInput && icon) {
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
+            } else {
+                passwordInput.type = "password";
+                icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+            }
+        }
+    }
+
+    // Live preview function for selected profile image
+    function previewImage(event) {
+        const reader = new FileReader();
+        reader.onload = function(){
+            const container = document.getElementById('avatarPreviewContainer');
+            if (container) {
+                container.innerHTML = `<img src="${reader.result}" alt="Avatar" id="avatarImg" style="width:100%; height:100%; object-fit:cover;">`;
+            }
+            const removeFlag = document.getElementById('remove_avatar_flag');
+            if (removeFlag) removeFlag.value = 'false';
+        }
+        if(event.target.files[0]){
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    }
+
+    // Handle avatar removal before saving
+    function removeAvatarImage() {
+        const container = document.getElementById('avatarPreviewContainer');
+        if (container) {
+            container.innerHTML = `<span id="avatarInitial">{{ request.user.username|first|upper }}</span>`;
+        }
+        const fileInput = document.getElementById('profile_picture');
+        if (fileInput) fileInput.value = "";
+        const removeFlag = document.getElementById('remove_avatar_flag');
+        if (removeFlag) removeFlag.value = 'true';
+    }
+</script>
+{% endblock %}

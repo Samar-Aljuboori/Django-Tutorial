@@ -6,11 +6,108 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Task Tracker{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="app-card">
-        {% block content %}
-        {% endblock %}
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <h2>TaskTracker</h2>
+            </div>
+            
+            <nav class="sidebar-menu">
+    <!-- Dashboard Link with Icon -->
+    <a href="{% url 'core' %}" class="nav-item {% if request.resolver_match.url_name == 'core' %}active{% endif %}">
+        <i class="fa-solid fa-house" style="margin-right: 10px;"></i>
+        <span>Dashboard</span>
+    </a>
+
+    <!-- Categories Link with Icon -->
+    <a href="{% url 'categories' %}" class="nav-item {% if request.resolver_match.url_name == 'categories' %}active{% endif %}">
+        <i class="fa-solid fa-folder-open" style="margin-right: 10px;"></i>
+        <span>Categories</span>
+    </a>
+        
+    <!-- Analytics Link with Icon -->
+    <a href="{% url 'analytics' %}" class="nav-item {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
+        <i class="fa-solid fa-chart-pie" style="margin-right: 10px;"></i>
+        <span>Analytics</span>
+    </a>
+
+    <!-- Settings Link with Icon -->
+    <a href="{% url 'settings' %}" class="nav-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+        <i class="fa-solid fa-gear" style="margin-right: 10px;"></i>
+        <span>Settings</span>
+    </a>
+</nav>
+
+            <!-- Mode Switcher -->
+            <div class="theme-switch-wrapper">
+                <button id="themeToggle" class="theme-btn">
+                    <span id="themeLabel"> Dark Mode</span>
+                </button>
+            </div>
+
+            <!-- Profile Widget (Clickable) -->
+            <a href="{% url 'profile' %}" class="sidebar-user-link">
+                <div class="sidebar-user">
+                    <div class="user-avatar">
+                        {% if request.user.profile.avatar %}
+                            <img src="{{ request.user.profile.avatar.url }}" alt="Profile">
+                        {% else %}
+                            {{ request.user.username|first|upper }}
+                        {% endif %}
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name">{{ request.user.username }}</span>
+                        <span class="user-role">Edit Profile &rarr;</span>
+                    </div>
+                </div>
+            </a>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Action / Notification Messages -->
+            {% if messages %}
+                <div class="messages-container">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </main>
     </div>
+
+    <!-- Dark / Light Mode Script -->
+    <script>
+        const toggleBtn = document.getElementById('themeToggle');
+        const themeLabel = document.getElementById('themeLabel');
+        const currentTheme = localStorage.getItem('theme');
+
+        if (currentTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+            themeLabel.textContent = ' Light Mode';
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-theme');
+            let theme = 'light';
+            
+            if (document.body.classList.contains('dark-theme')) {
+                theme = 'dark';
+                themeLabel.textContent = ' Light Mode';
+            } else {
+                themeLabel.textContent = ' Dark Mode';
+            }
+            localStorage.setItem('theme', theme);
+        });
+    </script>
 </body>
 </html>

@@ -1,157 +1,155 @@
 {% extends 'base.html' %}
 
-{% block title %}Task Tracker{% endblock %}
-
 {% block content %}
-    <h1>My Task List ({{ tasks.paginator.count|default:tasks.count }})</h1>
-    
-    <!-- Header Bar -->
-    <div class="header-bar">
-        <h3>Welcome, {{ request.user.username }}!</h3>
-        <a href="{% url 'logout' %}" class="btn-logout">Logout</a>
+<!-- Top Header Bar -->
+<header class="top-header">
+    <div>
+        <h1>Welcome back, {{ request.user.username }}!</h1>
+        <p class="subtitle">Manage your daily priorities and tracking in one place.</p>
     </div>
+</header>
 
-    <!-- Add Category Section Box -->
-    <div class="category-box">
-    <form method="POST" action="{% url 'add_category' %}" class="add-category-form">
-        {% csrf_token %}
-        <div class="form-row" style="display: flex; gap: 10px; width: 100%;">
-            <input type="text" name="name" placeholder="Category name (e.g. Work, Personal, Study)" required class="category-input">
-            <button type="submit" class="btn-add-category">+ Category</button>
-        </div>
-        </form>
+<!-- Stats Cards Section -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-title">Total Tasks</span>
+        <span class="stat-value">{{ total_tasks }}</span>
     </div>
-
-    <!-- Add Task Form -->
-    <form method="POST" class="add-task-form">
-        {% csrf_token %}
-        
-        <div class="form-row">
-            <input type="text" name="title" placeholder="add a new task..." required class="task-input">
-            <button type="submit" class="btn-add">Add Task</button>
-        </div>
-
-        <div class="form-row">
-            <select name="category" class="category-select">
-                <option value="">No Category</option>
-                {% for cat in categories %}
-                    <option value="{{ cat.id }}">{{ cat.name }}</option>
-                {% endfor %}
-            </select>
-
-            <select name="priority" class="priority-select">
-                <option value="low">Low Priority</option>
-                <option value="high">High Priority</option>
-            </select>
-
-            <input type="date" name="due_date" class="date-input">
-        </div>
-    </form>
-
-    <!-- Search, Filters and Sorting -->
-    <form method="GET" class="filter-sort-form">
-        <input type="text" name="search" placeholder="Search tasks..." value="{{ search_query }}" class="search-input">
-
-        <div class="filter-group">
-            <select name="category_filter" onchange="this.form.submit()" class="filter-select">
-                <option value="all">All Categories</option>
-                {% for cat in categories %}
-                    <option value="{{ cat.name }}" {% if category_filter == cat.name %}selected{% endif %}>
-                        {{ cat.name }}
-                    </option>
-                {% endfor %}
-            </select>
-
-            <select name="status" onchange="this.form.submit()" class="filter-select">
-                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
-                <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
-                <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
-            </select>
-
-            <select name="priority_filter" onchange="this.form.submit()" class="filter-select">
-                <option value="all" {% if priority_filter == 'all' %}selected{% endif %}>All Priorities</option>
-                <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low Priority</option>
-                <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High Priority</option>
-            </select>
-
-            <select name="sort" onchange="this.form.submit()" class="filter-select">
-                <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
-                <option value="oldest" {% if sort_by == 'oldest' %}selected{% endif %}>Oldest First</option>
-                <option value="due_date" {% if sort_by == 'due_date' %}selected{% endif %}>Due Date</option>
-            </select>
-        </div>
-    </form>
-
-    <div class="clear-container">
-        <a href="{% url 'clear_completed' %}" class="btn-action btn-delete">Clear Completed Tasks</a>
+    <div class="stat-card">
+        <span class="stat-title">Completed</span>
+        <span class="stat-value text-success">{{ completed_tasks }}</span>
     </div>
-
-    <!-- Task List -->
-    <ul class="task-list">
-        {% for task in tasks %}
-            <li class="task-item">
-                <div class="task-main">
-                    <a href="{% url 'task_detail' task.id %}" class="task-link">
-                        <span class="task-title {% if task.completed %}completed{% endif %}">
-                            {{ task.title }}
-                        </span>
-                    </a>
-
-                    {% if task.category %}
-                        <span class="category-badge">
-                            {{ task.category.name }}
-                        </span>
-                    {% endif %}
-
-                    <span class="priority-badge priority-{{ task.priority|lower }}">
-                        {{ task.get_priority_display }}
-                    </span>
-
-                    {% if task.due_date %}
-                        <span class="due-date-badge {% if task.is_overdue %}overdue{% endif %}">
-                            📅 {{ task.due_date|date:"Y-m-d" }}
-                        </span>
-                    {% endif %}
-                </div>
-
-                <div class="actions">
-                    <a href="{% url 'toggle_task' task.id %}" class="btn-action {% if task.completed %}btn-undo{% else %}btn-done{% endif %}">
-                        {% if task.completed %}Undo{% else %}Done{% endif %}
-                    </a>
-                    <a href="{% url 'edit_task' task.id %}" class="btn-action btn-undo">Edit</a>
-                    <a href="{% url 'delete_task' task.id %}" class="btn-action btn-delete">Delete</a>
-                </div>
-            </li>
-        {% empty %}
-            <div class="empty-state">
-                {% if search_query %}
-                    No tasks found matching "{{ search_query }}".
-                {% else %}
-                    No tasks found.
-                {% endif %}
-            </div>
-        {% endfor %}
-    </ul>
-
-   <!-- Pagination Section -->
-{% if tasks.has_other_pages %}
-<div class="pagination-container">
-    {% if tasks.has_previous %}
-        <a href="?page={{ tasks.previous_page_number }}&search={{ search_query }}&category_filter={{ category_filter }}&status={{ status_filter }}&priority_filter={{ priority_filter }}&sort={{ sort_by }}" class="btn-action btn-edit">
-            &laquo; Previous
-        </a>
-    {% endif %}
-
-    <span class="page-info">
-        Page {{ tasks.number }} of {{ tasks.paginator.num_pages }}
-    </span>
-
-    {% if tasks.has_next %}
-        <a href="?page={{ tasks.next_page_number }}&search={{ search_query }}&category_filter={{ category_filter }}&status={{ status_filter }}&priority_filter={{ priority_filter }}&sort={{ sort_by }}" class="btn-action btn-edit">
-            Next &raquo;
-        </a>
-    {% endif %}
+    <div class="stat-card">
+        <span class="stat-title">Pending</span>
+        <span class="stat-value text-warning">{{ pending_tasks }}</span>
+    </div>
 </div>
-{% endif %}
 
+<!-- Category Creation Panel -->
+<section class="panel-card" style="margin-bottom: 20px;">
+    <h3 class="panel-title">Add New Category</h3>
+    <form method="POST" action="{% url 'add_category' %}" class="horizontal-form">
+        {% csrf_token %}
+        <input type="text" name="name" placeholder="Category name (e.g., Work, Study)..." required class="form-input flex-2">
+        <button type="submit" class="btn-primary">+ Add Category</button>
+    </form>
+</section>
+
+<!-- Task Creation Panel -->
+<section class="panel-card">
+    <h3 class="panel-title">Add New Task</h3>
+    <form method="POST" action="{% url 'core' %}" class="horizontal-form">
+        {% csrf_token %}
+        <input type="text" name="title" placeholder="What needs to be done?" required class="form-input flex-2">
+        
+        <select name="category" class="form-input">
+            <option value="">No Category</option>
+            {% for cat in categories %}
+                <option value="{{ cat.id }}">{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="priority" class="form-input">
+            <option value="low">Low Priority</option>
+            <option value="medium">Medium Priority</option>
+            <option value="high">High Priority</option>
+        </select>
+
+        <input type="date" name="due_date" class="form-input">
+
+        <button type="submit" class="btn-primary">+ Add Task</button>
+    </form>
+</section>
+
+<!-- Tasks Table & Filters Panel -->
+<section class="panel-card">
+    <!-- Filter Controls Bar -->
+    <form method="GET" class="filter-grid">
+        <input type="text" name="search" value="{{ search_query }}" placeholder="Search tasks..." class="form-input">
+        
+        <select name="category_filter" onchange="this.form.submit()" class="form-input">
+            <option value="all">All Categories</option>
+            {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if category_filter == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="status" onchange="this.form.submit()" class="form-input">
+            <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+            <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+        </select>
+
+        <select name="priority_filter" onchange="this.form.submit()" class="form-input">
+            <option value="all" {% if priority_filter == 'all' %}selected{% endif %}>All Priorities</option>
+            <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High</option>
+            <option value="medium" {% if priority_filter == 'medium' %}selected{% endif %}>Medium</option>
+            <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low</option>
+        </select>
+
+        <select name="sort" onchange="this.form.submit()" class="form-input">
+            <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+            <option value="oldest" {% if sort_by == 'oldest' %}selected{% endif %}>Oldest First</option>
+        </select>
+    </form>
+
+    <!-- Clean Task Table -->
+    <div class="table-responsive">
+        <table class="dashboard-table">
+            <thead>
+                <tr>
+                    <th>Task Name</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Due Date</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                    <tr class="{% if task.completed %}is-completed{% endif %}">
+                        <td class="task-name-cell">{{ task.title }}</td>
+                        <td>
+                            {% if task.category %}
+                                <span class="pill-badge category-badge">{{ task.category.name }}</span>
+                            {% else %}
+                                <span class="text-muted">--</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="pill-badge priority-{{ task.priority }}">{{ task.priority|title }}</span>
+                        </td>
+                        <td>{{ task.due_date|date:"d/m/Y"|default:"-- / --" }}</td>
+                        <td class="text-right actions-cell">
+                            <a href="{% url 'toggle_task' task.id %}" class="btn-action-sm btn-done">
+                                {% if task.completed %}Undo{% else %}Done{% endif %}
+                            </a>
+                            <a href="{% url 'edit_task' task.id %}" class="btn-action-sm btn-edit">Edit</a>
+                            <a href="{% url 'delete_task' task.id %}" class="btn-action-sm btn-delete">Delete</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="empty-row">No tasks found. Add a task above to get started!</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Centered Pagination -->
+    {% if tasks.has_other_pages %}
+        <div class="pagination-wrapper">
+            {% if tasks.has_previous %}
+                <a href="?page={{ tasks.previous_page_number }}&search={{ search_query }}&category_filter={{ category_filter }}&status={{ status_filter }}&priority_filter={{ priority_filter }}&sort={{ sort_by }}" class="pg-link">&laquo; Previous</a>
+            {% endif %}
+
+            <span class="pg-info">Page {{ tasks.number }} of {{ tasks.paginator.num_pages }}</span>
+
+            {% if tasks.has_next %}
+                <a href="?page={{ tasks.next_page_number }}&search={{ search_query }}&category_filter={{ category_filter }}&status={{ status_filter }}&priority_filter={{ priority_filter }}&sort={{ sort_by }}" class="pg-link">Next &raquo;</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>
 {% endblock %}

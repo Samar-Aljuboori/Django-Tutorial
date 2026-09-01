@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<header class="top-header">
+    <div>
+        <h1>Account Settings</h1>
+        <p class="subtitle">Update your profile information and avatar picture.</p>
+    </div>
+</header>
+
+<section class="panel-card profile-card">
+    <form method="POST" enctype="multipart/form-data" class="profile-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+    <label for="username" class="form-label">Username</label>
+    <input type="text" id="username" name="username" value="{{ request.user.username }}" class="form-input" required>
+</div>
+
+<div class="form-group">
+    <label for="profile_picture" class="form-label">Profile Picture</label>
+    <input type="file" id="profile_picture" name="profile_picture" accept="image/*" class="form-input file-input" onclick="event.stopPropagation();">
+</div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Save Profile</button>
+            <a href="{% url 'core' %}" class="btn-secondary">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

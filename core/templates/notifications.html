@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications - Task Tracker{% endblock %}
+
+{% block content %}
+<div class="settings-page-layout">
+    
+    <!-- Sub-Sidebar Navigation Area -->
+    <div class="settings-sub-sidebar">
+        <div class="sub-sidebar-title">Your account</div>
+        <a href="{% url 'settings' %}" class="sub-nav-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">Profile</a>
+        <a href="{% url 'performance' %}" class="sub-nav-item {% if request.resolver_match.url_name == 'performance' %}active{% endif %}">Performance</a> 
+        <a href="{% url 'notifications' %}" class="sub-nav-item {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">Notifications</a>
+        
+        <div class="sub-sidebar-title" style="margin-top: 20px;">Security</div>
+        <a href="javascript:void(0);" class="sub-nav-item">Password & Security</a>
+    </div>
+
+    <!-- Main Notifications Content Area -->
+    <div class="settings-content-area">
+        
+        <!-- Page Header -->
+        <div class="settings-main-header">
+            <h2>Notifications</h2>
+            <p class="upload-hint">Manage how and when you receive your alerts.</p>
+        </div>
+
+        <form method="POST" class="settings-form-card">
+            {% csrf_token %}
+
+            <!-- Section 1: Notification Channels -->
+            <div class="notification-section-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <span>Notification Channels</span>
+            </div>
+            <p class="section-subtitle">Choose the channels where you want to receive notifications.</p>
+
+            <div class="notification-item-row">
+                <div class="notif-text-info">
+                    <h4>Email</h4>
+                    <p>Receive notifications on your registered email.</p>
+                </div>
+                <label class="switch-toggle">
+                    <input type="checkbox" checked name="email_channel">
+                    <span class="slider-round"></span>
+                </label>
+            </div>
+
+            <div class="notification-item-row">
+                <div class="notif-text-info">
+                    <h4>Push Notifications</h4>
+                    <p>Alerts on mobile and browser device.</p>
+                </div>
+                <label class="switch-toggle">
+                    <input type="checkbox" checked name="push_channel">
+                    <span class="slider-round"></span>
+                </label>
+            </div>
+
+            <div class="notification-item-row">
+                <div class="notif-text-info">
+                    <h4>In-App</h4>
+                    <p>Show notifications in the notification center.</p>
+                </div>
+                <label class="switch-toggle">
+                    <input type="checkbox" checked name="inapp_channel">
+                    <span class="slider-round"></span>
+                </label>
+            </div>
+
+
+            <!-- Section 2: Event Preferences -->
+            <div class="notification-section-title" style="margin-top: 35px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <span>Event Preferences</span>
+            </div>
+            <p class="section-subtitle">Select the events you want to be notified about.</p>
+
+            <div class="notification-item-row">
+                <div class="notif-text-info">
+                    <h4>New Task Assignment</h4>
+                    <p>When a task is assigned to you.</p>
+                </div>
+                <label class="switch-toggle">
+                    <input type="checkbox" checked name="new_task">
+                    <span class="slider-round"></span>
+                </label>
+            </div>
+
+            <div class="notification-item-row">
+                <div class="notif-text-info">
+                    <h4>Due Date Reminder</h4>
+                    <p>Before the task submission deadline.</p>
+                </div>
+                <label class="switch-toggle">
+                    <input type="checkbox" checked name="due_reminder">
+                    <span class="slider-round"></span>
+                </label>
+            </div>
+
+            <div class="notification-item-row">
+                <div class="notif-text-info">
+                    <h4>New Comment</h4>
+                    <p>When a comment is added to your task.</p>
+                </div>
+                <label class="switch-toggle">
+                    <input type="checkbox" checked name="new_comment">
+                    <span class="slider-round"></span>
+                </label>
+            </div>
+
+            <div class="notification-item-row">
+                <div class="notif-text-info">
+                    <h4>Status Change</h4>
+                    <p>When updating the status of a task you follow.</p>
+                </div>
+                <label class="switch-toggle">
+                    <input type="checkbox" name="status_change">
+                    <span class="slider-round"></span>
+                </label>
+            </div>
+
+            <div class="notification-item-row">
+                <div class="notif-text-info">
+                    <h4>Mention</h4>
+                    <p>When you are mentioned in a comment or task.</p>
+                </div>
+                <label class="switch-toggle">
+                    <input type="checkbox" checked name="mention">
+                    <span class="slider-round"></span>
+                </label>
+            </div>
+
+            <div class="notification-item-row">
+                <div class="notif-text-info">
+                    <h4>Task Completion</h4>
+                    <p>When completing a task you participated in.</p>
+                </div>
+                <label class="switch-toggle">
+                    <input type="checkbox" name="task_completion">
+                    <span class="slider-round"></span>
+                </label>
+            </div>
+
+            <div class="notification-item-row">
+                <div class="notif-text-info">
+                    <h4>Invitations</h4>
+                    <p>Invitations to projects or workspaces.</p>
+                </div>
+                <label class="switch-toggle">
+                    <input type="checkbox" checked name="invitations">
+                    <span class="slider-round"></span>
+                </label>
+            </div>
+
+            <div class="notification-item-row">
+                <div class="notif-text-info">
+                    <h4>Weekly Summary</h4>
+                    <p>Weekly report of your activity and tasks.</p>
+                </div>
+                <label class="switch-toggle">
+                    <input type="checkbox" checked name="weekly_summary">
+                    <span class="slider-round"></span>
+                </label>
+            </div>
+
+
+            <!-- Section 3: Schedule & Frequency -->
+            <div class="notification-section-title" style="margin-top: 35px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <span>Schedule & Frequency</span>
+            </div>
+            <p class="section-subtitle">Control quiet hours and notification frequency.</p>
+
+            <div class="notification-item-row">
+                <div class="notif-text-info">
+                    <h4>Do Not Disturb</h4>
+                    <p>Mute notifications during a specific period of the day.</p>
+                </div>
+                <label class="switch-toggle">
+                    <input type="checkbox" name="dnd_mode">
+                    <span class="slider-round"></span>
+                </label>
+            </div>
+
+            <!-- Dropdown Fields -->
+            <div class="form-row-grid" style="margin-top: 20px;">
+                <div class="input-group">
+                    <label>Notification Frequency</label>
+                    <p class="upload-hint" style="margin-top:0; margin-bottom:6px;">How do you want to receive your notifications</p>
+                    <select name="frequency" class="pro-input">
+                        <option value="instant">Instant — Upon event occurrence</option>
+                        <option value="daily">Daily summary</option>
+                        <option value="weekly">Weekly summary</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>Due Reminder Time</label>
+                    <p class="upload-hint" style="margin-top:0; margin-bottom:6px;">When to receive alert before task deadline</p>
+                    <select name="reminder_time" class="pro-input">
+                        <option value="none">No reminder</option>
+                        <option value="hour">1 hour before</option>
+                        <option value="day" selected>1 day before</option>
+                        <option value="three_days">3 days before</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Save Button Footer -->
+            <div class="form-footer-actions" style="margin-top: 30px; display: flex; justify-content: flex-end;">
+                <button type="submit" class="btn-save-purple">Save Changes</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}

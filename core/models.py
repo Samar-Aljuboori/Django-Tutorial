@@ -1,5 +1,29 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
+# ==========================================
+# Profile Model: Stores extra user details (e.g., Avatar)
+# ==========================================
+class Profile(models.Model):
+    # One-to-one link to Django's built-in User model
+    user = models.OneToOneField(User, on_delete=models.CASCADE)       
+    # Stores user avatar image; saves inside 'avatars/' folder in media directory
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s Profile"
+
+
+# Signals to automatically create or update Profile whenever a User is created/updated
+@receiver(post_save, sender=User)
+def create_or_update_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+    instance.profile.save()
+
 
 # ==========================================
 # Category Model: Handles task categories (e.g., Work, Study)
@@ -26,15 +50,18 @@ class Category(models.Model):
 class Task(models.Model):
     # Foreign key linking the task to the user who owns it; deletes tasks if the user is deleted
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)    
+    
     # Stores the title or main text of the task
     title = models.CharField(max_length=200)
     
     # Stores the priority level of the task (e.g., low, medium, high) with 'low' as default
     PRIORITY_CHOICES = [
         ('low', 'Low'),
+        ('medium', 'Medium'),
         ('high', 'High'),
     ]
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='low')    
+    
     # Optional due date for the task; allows null values in the database and empty forms
     due_date = models.DateField(null=True, blank=True)
     

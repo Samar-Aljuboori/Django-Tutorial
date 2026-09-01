@@ -1,23 +1,27 @@
 {% extends 'base.html' %}
-{% load static %}
 
-{% block title %}Edit Task{% endblock %}
+{% block title %}Edit Task - TaskTracker{% endblock %}
 
 {% block content %}
+<!-- Header Section -->
+<header class="top-header">
     <h1>Edit Task</h1>
+    <p class="subtitle">Update the details of your task below.</p>
+</header>
 
-    <!-- Form to edit existing task details -->
-    <form method="POST" class="add-task-form">
+<!-- Edit Task Form Card -->
+<section class="panel-card" style="max-width: 550px;">
+    <form method="POST">
         {% csrf_token %}
 
-        <!-- Task title input -->
-        <div class="form-row">
-            <input type="text" name="title" value="{{ task.title }}" required class="task-input">
+        <div style="margin-bottom: 16px;">
+            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px;">Task Title</label>
+            <input type="text" name="title" value="{{ task.title }}" required class="form-input" style="width: 100%;">
         </div>
 
-        <!-- Category selection, priority dropdown, and due date picker -->
-        <div class="form-row">
-            <select name="category" class="category-select">
+        <div style="margin-bottom: 16px;">
+            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px;">Category</label>
+            <select name="category" class="form-input" style="width: 100%;">
                 <option value="">No Category</option>
                 {% for cat in categories %}
                     <option value="{{ cat.id }}" {% if task.category and task.category.id == cat.id %}selected{% endif %}>
@@ -25,19 +29,26 @@
                     </option>
                 {% endfor %}
             </select>
+        </div>
 
-            <select name="priority" class="priority-select">
+        <div style="margin-bottom: 16px;">
+            <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px;">Priority</label>
+            <select name="priority" class="form-input" style="width: 100%;">
                 <option value="low" {% if task.priority == 'low' %}selected{% endif %}>Low Priority</option>
+                <option value="medium" {% if task.priority == 'medium' %}selected{% endif %}>Medium Priority</option>
                 <option value="high" {% if task.priority == 'high' %}selected{% endif %}>High Priority</option>
             </select>
-
-            <input type="date" name="due_date" value="{{ task.due_date|date:'Y-m-d' }}" class="date-input">
         </div>
 
-        <!-- Save and Cancel action buttons -->
-        <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button type="submit" class="btn-add">Save Changes</button>
-            <a href="{% url 'index' %}" class="btn-action btn-undo">Cancel</a>
+       <div style="margin-bottom: 24px;">
+        <label style="display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px;">Due Date</label>
+        <input type="date" name="due_date" value="{{ task.due_date|date:'Y-m-d' }}" class="form-input" style="width: 100%;">
+       </div>
+
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <button type="submit" class="btn-primary">Save Changes</button>
+            <a href="{% url 'core' %}" class="btn-action-sm btn-edit" style="padding: 9px 18px; font-size: 14px; text-decoration: none;">Cancel</a>
         </div>
     </form>
+</section>
 {% endblock %}
