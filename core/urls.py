@@ -36,6 +36,13 @@ urlpatterns = [
     path('categories/edit/<int:category_id>/', views.edit_category, name='edit_category'),
      # URL route for  analytics
     path('analytics/', views.analytics_view, name='analytics'),
+    # URL route for  security settings / Change Password
+    path('settings/security/', views.security_settings_view, name='security_settings'),
+    # URL route for  settings / remove_avatar
+    path('settings/profile/remove-avatar/', views.remove_avatar_view, name='remove_avatar'),
+    # Calendar & Schedule Routes
+    path('calendar/', views.calendar_view, name='calendar_view'),
+    path('calendar/add-task/', views.add_calendar_task, name='add_calendar_task'),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

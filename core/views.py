@@ -7,6 +7,8 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.contrib import messages
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
+from django.http import JsonResponse
+from datetime import datetime
 
 # ==========================================
 # 1. Main Dashboard View (Task List, Search, Filter, Pagination & Creation)
@@ -48,13 +50,13 @@ def core(request):
         tasks = tasks.filter(title__icontains=search_query)
 
     # Filter tasks by completion status
-    if status_filter == 'active':
+    if status_filter in ['active', 'pending']:
         tasks = tasks.filter(completed=False)
     elif status_filter == 'completed':
         tasks = tasks.filter(completed=True)
 
     # Filter tasks by priority level
-    if priority_filter in ['low', 'high']:
+    if priority_filter in ['low', 'high', 'medium']:
         tasks = tasks.filter(priority=priority_filter)
 
     # Filter tasks by category ID
@@ -160,9 +162,6 @@ def delete_task(request, task_id):
     return redirect('core')
 
 
-
-
-
 # ==========================================
 # 5. Clear Completed Tasks View
 # ==========================================
@@ -232,81 +231,111 @@ def toggle_task(request, task_id):
         
     return redirect('core')
 
-# ==========================================
-# 8. User profile Views 
-# ==========================================
-@login_required
-def profile_view(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        profile_pic = request.FILES.get('profile_picture')
-
-        if username:
-            request.user.username = username
-            request.user.save()
-
-        if profile_pic and hasattr(request.user, 'profile'):
-            request.user.profile.avatar = profile_pic
-            request.user.profile.save()
-
-        messages.success(request, 'Profile updated successfully!')
-        return redirect('profile')  
-
-    return render(request, 'profile.html')
 
 # ==========================================
-# 9. User profile settings view 
+# Main Settings Dashboard View: Renders the main settings hub
 # ==========================================
 @login_required
 def settings_view(request):
-    profile = request.user.profile 
-    
     if request.method == 'POST':
-        # 1. Check if the user is attempting to change their password
-        password_form = PasswordChangeForm(request.user, request.POST)
+        # Extract username and email data from POST request
+        username = request.POST.get('username')
+        email = request.POST.get('email')
         
-        # We check if the user actually typed something in the old_password field
-        is_changing_password = bool(request.POST.get('old_password'))
+        if username:
+            request.user.username = username
+        if email:
+            request.user.email = email
+        request.user.save()
         
-        if is_changing_password:
-            if password_form.is_valid():
-                updated_user = password_form.save()
-                update_session_auth_hash(request, updated_user)
-            else:
-                # If password is wrong, stop everything and show error message
-                messages.error(request, "Please correct the password errors below.")
-                context = {'password_form': password_form}
-                return render(request, 'settings.html', context)
-
-        # 2. Update basic user info (username and email) only if password check passed (or wasn't attempted)
-        user = request.user
-        user.username = request.POST.get('username', user.username)
-        user.email = request.POST.get('email', user.email)
-        user.save()
+        # Handle user profile and avatar operations
+        profile = request.user.profile
         
-        # 3. Handle avatar removal
-        remove_flag = request.POST.get('remove_avatar')
-        if remove_flag == 'true':
+        # Check if profile picture removal was requested
+        remove_avatar = request.POST.get('remove_avatar')
+        if remove_avatar == 'true':
             if profile.avatar:
                 profile.avatar.delete(save=False)
-                profile.avatar = None
-                profile.save()
+            profile.avatar = None
+            profile.save()
         
-        # 4. Handle avatar upload
-        if 'profile_picture' in request.FILES:
+        # Check if a new profile picture file was uploaded
+        elif 'profile_picture' in request.FILES:
             profile.avatar = request.FILES['profile_picture']
             profile.save()
             
-        messages.success(request, "Settings updated successfully!")
+        # Send a single consolidated success notification message
+        messages.success(request, "Settings updated successfully.")
+        return redirect('settings')
+        
+    return render(request, 'settings.html')
+# ==========================================
+# 8. User Profile View: Handle basic user info, avatar upload, and avatar removal
+# ==========================================
+@login_required
+def profile_view(request):
+    profile = request.user.profile
+
+    if request.method == 'POST':
+        # 1. Update Username & Email
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        
+        if username:
+            request.user.username = username
+        if email:
+            request.user.email = email
+        request.user.save()
+
+        # 2. Handle Avatar Upload
+        if 'profile_picture' in request.FILES:
+            if profile.avatar:
+                profile.avatar.delete(save=False)  # حذف الصورة القديمة من الفولدر
+            profile.avatar = request.FILES['profile_picture']
+            profile.save()
+
+        messages.success(request, 'Profile updated successfully!')
         return redirect('settings')
 
+    return render(request, 'settings.html')
+
+
+@login_required
+def remove_avatar_view(request):
+    profile = request.user.profile
+    if profile.avatar:
+        profile.avatar.delete(save=False)  
+        profile.avatar = None            
+        profile.save()
+        messages.success(request, 'Profile picture removed successfully!')
+    
+    return redirect('settings')
+
+# ==========================================
+# 9. Security Settings View: Handle password changes securely
+# ==========================================
+@login_required
+def security_settings_view(request):
+    """
+    Handle password updates in an independent, secure page.
+    """
+    if request.method == 'POST':
+        password_form = PasswordChangeForm(request.user, request.POST)
+        if password_form.is_valid():
+            updated_user = password_form.save()
+            update_session_auth_hash(request, updated_user)  # Keep user logged in after password change
+            messages.success(request, "Password updated successfully!")
+            return redirect('security_settings')
+        else:
+            messages.error(request, "Please correct the password errors below.")
     else:
         password_form = PasswordChangeForm(request.user)
 
     context = {
         'password_form': password_form,
     }
-    return render(request, 'settings.html', context)
+    return render(request, 'security_settings.html', context)
+
 
 # ==========================================
 # 10. User profile performancen view
@@ -374,6 +403,7 @@ def categories_view(request):
         if category_name:
             # Create a new category linked to the logged-in user
             Category.objects.create(user=request.user, name=category_name.strip())
+            messages.success(request, "Category added successfully!")
             return redirect('categories')
 
     # Fetch all categories belonging to the current logged-in user
@@ -388,13 +418,13 @@ def categories_view(request):
 # ==========================================
 # 13. Delete Category View: Removes a category from the database
 # ==========================================
-@login_required
 def delete_category(request, category_id):
-    """
-    Delete a specific category by its ID if it belongs to the logged-in user.
-    """
     category = get_object_or_404(Category, id=category_id, user=request.user)
-    category.delete()
+    if request.method == 'POST':
+        category.delete()
+        messages.error(request, "Category deleted successfully!")
+        return redirect('categories')
+    
     return redirect('categories')
 
 
@@ -421,7 +451,6 @@ def edit_category(request, category_id):
 # 15.  Analytics View: Calculate task statistics and metrics for user
 # ==========================================
 @login_required
-@login_required
 def analytics_view(request):
     """
     Handle analytics dashboard showing task completion rates, counts, and categories distribution.
@@ -443,3 +472,80 @@ def analytics_view(request):
         'completion_rate': completion_rate,
     }
     return render(request, 'analytics.html', context)
+
+# ==========================================
+# 16. Calendar View: Renders the calendar page and user tasks
+# ==========================================
+@login_required(login_url='login')
+def calendar_view(request):
+    # Fetch all tasks belonging to the logged-in user
+    user_tasks = Task.objects.filter(user=request.user)
+    categories = Category.objects.filter(user=request.user)
+    
+    context = {
+        'user_tasks': user_tasks,
+        'categories': categories,
+    }
+    # Corrected path to match your templates folder structure
+    return render(request, 'calendar.html', context)
+
+# ==========================================
+# 17. Add/Edit Calendar Task View: Handles task creation & updates from calendar modal
+# ==========================================
+@login_required(login_url='login')
+def add_calendar_task(request):
+    if request.method == 'POST':
+        task_id = request.POST.get('task_id')
+        title = request.POST.get('title')
+        date_str = request.POST.get('date')
+        time_str = request.POST.get('time')
+        category_name = request.POST.get('category')
+        description = request.POST.get('description')
+
+        # Parse date safely
+        due_date = None
+        if date_str:
+            try:
+                due_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            except ValueError:
+                due_date = None
+
+        # Parse time safely
+        task_time = None
+        if time_str:
+            try:
+                task_time = datetime.strptime(time_str, '%H:%M').time()
+            except ValueError:
+                task_time = None
+
+        # Handle category association
+        category_obj = None
+        if category_name:
+            category_obj, created = Category.objects.get_or_create(
+                user=request.user, 
+                name=category_name
+            )
+
+        if task_id:
+            # Update existing task
+            task = get_object_or_404(Task, id=task_id, user=request.user)
+            task.title = title
+            if due_date:
+                task.due_date = due_date
+            task.time = task_time
+            task.category = category_obj
+            task.description = description
+            task.save()
+        else:
+            # Create new task
+            Task.objects.create(
+                user=request.user,
+                title=title,
+                due_date=due_date,
+                time=task_time,
+                category=category_obj,
+                description=description,
+                priority='medium'
+            )
+
+    return redirect('calendar_view')

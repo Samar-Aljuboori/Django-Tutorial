@@ -11,7 +11,7 @@ class Profile(models.Model):
     # One-to-one link to Django's built-in User model
     user = models.OneToOneField(User, on_delete=models.CASCADE)       
     # Stores user avatar image; saves inside 'avatars/' folder in media directory
-    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.username}'s Profile"
@@ -23,6 +23,7 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
     if created:
         Profile.objects.create(user=instance)
     instance.profile.save()
+
 
 
 # ==========================================
@@ -61,6 +62,12 @@ class Task(models.Model):
         ('high', 'High'),
     ]
     priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='low')    
+
+    # Optional time for the task/appointment
+    time = models.TimeField(null=True, blank=True)
+
+    # Optional detailed description for the task
+    description = models.TextField(null=True, blank=True)
     
     # Optional due date for the task; allows null values in the database and empty forms
     due_date = models.DateField(null=True, blank=True)

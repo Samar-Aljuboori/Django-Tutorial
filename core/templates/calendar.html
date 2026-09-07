@@ -1,0 +1,140 @@
+{% extends 'base.html' %} {% load static %} {% block title %}Calendar & Schedule
+- Planify{% endblock %} {% block extra_css %}
+<!-- Professional external CSS file linkage -->
+<link rel="stylesheet" href="{% static 'css/calendar.css' %}" />
+{% endblock %} {% block content %}
+<div class="calendar-page-layout">
+  <!-- Main Calendar Container -->
+  <div class="calendar-main-content">
+    <!-- Calendar Header Controls -->
+    <div class="calendar-header-wrapper">
+      <div class="calendar-title-area">
+        <h1 id="currentMonthYear">September 2026</h1>
+        <p class="subtitle">
+          Manage your daily schedule, tasks, and appointments seamlessly.
+        </p>
+      </div>
+      <div class="calendar-nav-actions">
+        <button type="button" class="cal-btn-secondary" id="prevMonthBtn">
+          Previous
+        </button>
+        <button type="button" class="cal-btn-primary" id="todayBtn">
+          Today
+        </button>
+        <button type="button" class="cal-btn-secondary" id="nextMonthBtn">
+          Next
+        </button>
+      </div>
+    </div>
+
+    <!-- Calendar Grid Layout -->
+    <div class="calendar-card-container">
+      <!-- Weekdays Header -->
+      <div class="calendar-weekdays-grid">
+        <div class="weekday-item">Mon</div>
+        <div class="weekday-item">Tue</div>
+        <div class="weekday-item">Wed</div>
+        <div class="weekday-item">Thu</div>
+        <div class="weekday-item">Fri</div>
+        <div class="weekday-item">Sat</div>
+        <div class="weekday-item">Sun</div>
+      </div>
+
+      <!-- Days Matrix Grid (Rendered dynamically via JS or server-side) -->
+      <div class="calendar-days-grid" id="calendarDaysGrid">
+        <!-- Days cells will be injected here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Professional Modal for Adding/Editing Task / Appointment -->
+<div id="taskModal" class="cal-modal-overlay">
+  <div class="cal-modal-content">
+    <div class="cal-modal-header">
+      <h3 id="modalTitleText">Add Task / Appointment</h3>
+      <button type="button" class="cal-close-modal" id="closeModalBtn">
+        &times;
+      </button>
+    </div>
+
+    <form
+      method="POST"
+      action="{% url 'add_calendar_task' %}"
+      class="cal-task-form"
+      id="taskFormElement"
+    >
+      {% csrf_token %}
+      <input type="hidden" id="selectedDateInput" name="date" />
+      <input type="hidden" id="taskIdInput" name="task_id" />
+      <!-- Hidden field to track editing -->
+
+      <div class="cal-form-group">
+        <label for="taskTitle">Task / Event Title</label>
+        <input
+          type="text"
+          id="taskTitle"
+          name="title"
+          required
+          placeholder="e.g., UI/UX Review meeting"
+        />
+      </div>
+
+      <div class="cal-form-row">
+        <div class="cal-form-group">
+          <label for="taskCategory">Category</label>
+          <select id="taskCategory" name="category">
+            {% for cat in categories %}
+            <option value="{{ cat.name }}">{{ cat.name }}</option>
+            {% empty %}
+            <option value="General">General</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="cal-form-group">
+          <label for="taskTime">Time</label>
+          <input type="time" id="taskTime" name="time" />
+        </div>
+      </div>
+
+      <div class="cal-form-group">
+        <label for="taskDescription">Description (Optional)</label>
+        <textarea
+          id="taskDescription"
+          name="description"
+          rows="3"
+          placeholder="Add extra details..."
+        ></textarea>
+      </div>
+
+      <div class="cal-modal-actions">
+        <button type="submit" class="cal-btn-save" id="saveBtnText">
+          Save Event
+        </button>
+        <button type="button" class="cal-btn-cancel" id="cancelModalBtn">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Embed server-side tasks safely into JavaScript -->
+<script>
+  const serverTasks = [
+      {% for task in user_tasks %}
+      {
+          id: "{{ task.id }}",
+          title: "{{ task.title|escapejs }}",
+          date: "{{ task.due_date|date:'Y-m-d' }}",
+          time: "{% if task.time %}{{ task.time|time:'H:i' }}{% endif %}",
+          category: "{% if task.category %}{{ task.category.name }}{% else %}General{% endif %}",
+          description: "{{ task.description|default:''|escapejs }}"
+      },
+      {% endfor %}
+  ];
+</script>
+
+<!-- External JavaScript File Linkage -->
+<script src="{% static 'js/calendar.js' %}"></script>
+{% endblock %}
